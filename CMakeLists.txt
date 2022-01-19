@@ -1,3 +1,5 @@
 project(Leetcode_cn)
 
+add_subdirectory(leetcode_0008_M)
 add_subdirectory(leetcode_0289_M)
+add_subdirectory(leetcode_0539_M)
