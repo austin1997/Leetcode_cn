@@ -56,10 +56,10 @@ public:
             } else {
                 result[i] = upperSum - lowerSum + *lower.rbegin();
             }
+            while (result[i] < 0) {
+                result[i] += mod;
+            }
             result[i] %= mod;
-        }
-        while (result[i] < 0) {
-            result[i] += mod;
         }
         return result;
     }
