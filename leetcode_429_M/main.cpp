@@ -8,9 +8,9 @@
 using namespace std;
 
 /*
- * @lc app=leetcode.cn id=589 lang=cpp
+ * @lc app=leetcode.cn id=429 lang=cpp
  *
- * [589] N 叉树的前序遍历
+ * [429] N 叉树的层序遍历
  */
 
 // @lc code=start
@@ -36,19 +36,22 @@ public:
 
 class Solution {
 public:
-    vector<int> preorder(Node* root) {
+    vector<vector<int>> levelOrder(Node* root) {
         if (root == nullptr) {
             return {};
         }
-        deque<Node *> stack;
-        vector<int> result;
-        stack.emplace_back(root);
-        while (!stack.empty()) {
-            auto current = stack.back();
-            stack.pop_back();
-            result.emplace_back(current->val);
-            for (auto iter = current->children.rbegin(); iter != current->children.rend(); ++iter) {
-                stack.emplace_back(*iter);
+        vector<vector<int>> result;
+        deque<Node *> queue;
+        queue.emplace_back(root);
+        while (!queue.empty()) {
+            result.emplace_back(vector<int>());
+            auto &tmp = result.back();
+            auto size = queue.size();
+            for (int i = 0; i < size; i++) {
+                auto curr = queue.front();
+                queue.pop_front();
+                tmp.emplace_back(curr->val);
+                queue.insert(queue.end(), curr->children.begin(), curr->children.end());
             }
         }
         return result;
@@ -59,5 +62,6 @@ public:
 int main(int argc, char const *argv[])
 {
     Solution sol;
+
     return 0;
 }
