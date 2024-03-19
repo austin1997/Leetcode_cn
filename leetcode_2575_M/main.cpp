@@ -44,7 +44,7 @@ int main(int argc, char const *argv[])
     // std::cout << sol.countPaths(7, in1) << std::endl;
 
     std::vector<vector<int>> in1 = {{1,0,10}};
-    std::cout << sol.countPaths(2, in1) << std::endl;
+    // std::cout << sol.countPaths(2, in1) << std::endl;
 
     return 0;
 }
