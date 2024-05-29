@@ -1,63 +1,91 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <deque>
+#include <unordered_set>
 
 using namespace std;
 
 class Solution {
 public:
-    int maxConsecutiveAnswers(string answerKey, int k) {
-        return std::max(helper2(answerKey, k, 'T'), helper2(answerKey, k, 'F'));
-        // return std::max(helper(answerKey, k, 'T'), helper(answerKey, k, 'F'));
-    }
-
-    int helper2(string answerKey, int k, char major) {
-        int i = 0;
-        int result = 0;
-        for (int j = 0; j < answerKey.length(); j++) {
-            if (answerKey[j] != major) {
-                if (k > 0) {
-                    k--;
-                } else {
-                    while(answerKey[i] == major) {
-                        i++;
-                    }
-                    i++;
-                }
-            }
-            result = std::max(result, j - i + 1);
-        }
-        return result;
-    }
-
-    int helper(string answerKey, int k, char major) {
-        vector<int> prev(k + 1, 0);
-        vector<int> next(k + 1);
-        int result = 0;
-        for (int i = 1; i <= answerKey.length(); i++) {
-            char current = answerKey[i - 1];
-            if (current == major) {
-                for (int j = 0; j <= k; j++) {
-                    next[j] = prev[j] + 1;
-                    result = std::max(result, next[j]);
-                }
+    vector<int> minimumCost(int n, vector<vector<int>>& edges, vector<vector<int>>& query) {
+        vector<unordered_set<int>> graphs;
+        vector<int> graphWeight;
+        vector<int> graphIndex(n, -1);
+        for (auto& edge : edges) {
+            auto u = edge[0];
+            auto v = edge[1];
+            auto w = edge[2];
+            if (graphIndex[u] < 0 && graphIndex[v] < 0) {
+                auto index = graphs.size();
+                graphs.emplace_back();
+                graphs.back().emplace(u);
+                graphs.back().emplace(v);
+                graphIndex[u] = index;
+                graphIndex[v] = index;
+                graphWeight.emplace_back(w);
+            } else if (graphIndex[u] < 0) {
+                auto index = graphIndex[v];
+                auto& graph = graphs[index];
+                graph.emplace(u);
+                graphIndex[u] = index;
+                graphWeight[index] &= w;
+            } else if (graphIndex[v] < 0) {
+                auto index = graphIndex[u];
+                auto& graph = graphs[index];
+                graph.emplace(v);
+                graphIndex[v] = index;
+                graphWeight[index] &= w;
             } else {
-                next[0] = 0;
-                for (int j = 1; j <= k; j++) {
-                    next[j] = prev[j - 1] + 1;
-                    result = std::max(result, next[j]);
+                auto indexU = graphIndex[u];
+                auto indexV = graphIndex[v];
+                if (indexU == indexV) {
+                    graphWeight[indexU] &= w;
+                    continue;
                 }
+                auto& graphU = graphs[indexU];
+                auto& graphV = graphs[indexV];
+                graphU.insert(graphV.begin(), graphV.end());
+                for (auto i : graphV) {
+                    graphIndex[i] = indexU;
+                }
+                graphV.clear();
+                graphWeight[indexU] &= graphWeight[indexV];
+                graphWeight[indexU] &= w;
             }
-            prev.swap(next);
+        }
+
+        vector<int> result;
+        for (auto& q : query) {
+            auto s = q[0];
+            auto t = q[1];
+            if (s == t) {
+                result.emplace_back(0);
+            } else if (graphIndex[s] == graphIndex[t] &&  graphIndex[t] != -1) {
+                result.emplace_back(graphWeight[graphIndex[s]]);
+            } else {
+                result.emplace_back(-1);
+            }
         }
         return result;
+        
     }
 };
 
 int main(int argc, char const *argv[])
 {
     Solution sol;
-//    cout << sol.maxConsecutiveAnswers("TTFF", 2) << endl;
-    cout << sol.maxConsecutiveAnswers("FFTFTTTFFF", 1) << endl;
+    // n = 5, edges = [[0,1,7],[1,3,7],[1,2,1]], query = [[0,3],[3,4]]
+    // vector<vector<int>> edges = {{0,1,7},{1,3,7},{1,2,1}};
+    // vector<vector<int>> query = {{0,3},{3,4}};
+    // cout << sol.minimumCost(5, edges, query).size() << endl;
+
+    // n = 3, edges = [[0,2,7],[0,1,15],[1,2,6],[1,2,1]], query = [[1,2]]
+    // 8
+// [[3,6,6],[6,1,0],[1,3,1]]
+// [[5,7],[6,2]]
+    vector<vector<int>> edges = {{3,6,6},{6,1,0},{1,3,1}};
+    vector<vector<int>> query = {{5,7},{6,2}};
+    cout << sol.minimumCost(8, edges, query).size() << endl;
     return 0;
 }

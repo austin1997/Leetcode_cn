@@ -24,9 +24,13 @@ public:
         return nullptr;
     }
 
-    ~TreeNode() {
-        delete left;
-        delete right;
+    static void clean(TreeNode *root) {
+        if (root == nullptr) {
+            return;
+        }
+        clean(root->left);
+        clean(root->right);
+        delete root;
     }
 };
 
